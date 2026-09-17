@@ -992,7 +992,7 @@ The **No.** column runs consecutively from **JSP-000001** to **JSP-001022** in d
 | JSP-000876 | [Can several consecutive integer intervals each have product congruent to one modulo the same prime?](catalog-0801-0900.md#JSP-000876) | Open | No | No | Unavailable |
 | JSP-000877 | [Carmichael numbers](catalog-0801-0900.md#JSP-000877) | Progress | No | No | Unavailable |
 | JSP-000878 | [Are there only finitely many factorials plus one supported on the specified next two primes?](catalog-0801-0900.md#JSP-000878) | Solved | No | No | Unavailable |
-| JSP-000879 | [Is there a prime whose difference from every permitted smaller factorial is composite?](catalog-0801-0900.md#JSP-000879) | Open | No | No | Unavailable |
+| JSP-000879 | [Are there infinitely many primes whose difference from every smaller factorial is composite?](catalog-0801-0900.md#JSP-000879) | Open | No | No | Unavailable |
 | JSP-000880 | [How many integers can have a prescribed value of the integer times its divisor sum?](catalog-0801-0900.md#JSP-000880) | Open | No | No | Unavailable |
 | JSP-000881 | [How many integer solutions satisfy the specified additive equation involving the sum-of-divisors function?](catalog-0801-0900.md#JSP-000881) | Open | No | No | Unavailable |
 | JSP-000882 | [How large can an integer-interval subset be if no element divides two other elements?](catalog-0801-0900.md#JSP-000882) | Progress | No | No | Unavailable |
