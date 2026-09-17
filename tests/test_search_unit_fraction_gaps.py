@@ -20,6 +20,28 @@ class UnitFractionGapSearchTests(unittest.TestCase):
         self.assertTrue(search.has_stranded_prime_power([5, 6, 7], 0))
         self.assertFalse(search.has_stranded_prime_power([2, 3, 6], 0))
 
+    def test_full_top_layer_congruence_is_checked(self):
+        # The maximum 31-adic valuation occurs twice, so a unique-maximum
+        # test cannot reject this sequence.  Its required top-layer sum is
+        # 1 + 1/2, which is nonzero modulo 31.
+        sequence = [
+            9, 11, 13, 14, 16, 17, 19, 21, 23, 25,
+            27, 29, 31, 33, 34, 36, 38, 40, 42, 44,
+            46, 48, 50, 52, 54, 56, 58, 60, 62,
+        ]
+        self.assertTrue(search.has_stranded_prime_power(sequence, 0))
+
+    def test_lower_p_adic_layers_are_retained(self):
+        layers = {}
+        prefix = []
+        for denominator in [2, 4, 12]:
+            prefix.append(denominator)
+            layers = search.extend_top_layers(layers, prefix)
+        # The two top-layer cofactors 1 and 3 cancel modulo 2, but the
+        # denominator 2 contributes a carry: 1 + 3 + 2 = 2 (mod 4).
+        self.assertEqual(layers[2], (4, 2))
+        self.assertTrue(search.has_impossible_top_layer(layers, 12, 0))
+
     def test_no_counterexample_through_ten_terms(self):
         result = search.scan(10)
         self.assertEqual(len(result["results"]), 9)

@@ -19,7 +19,7 @@ import argparse
 import json
 from fractions import Fraction
 from functools import lru_cache
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, FrozenSet, List, Optional, Tuple
 
 
 @lru_cache(maxsize=None)
@@ -49,32 +49,119 @@ def prime_power_factors(value: int) -> Tuple[Tuple[int, int], ...]:
     return tuple(factors)
 
 
-def has_stranded_prime_power(sequence: List[int], remaining: int) -> bool:
-    """Detect a prime power that cannot attain its maximum twice.
+TopLayers = Dict[int, Tuple[int, int]]
 
-    If reciprocals of the completed denominator sequence sum to an integer,
-    the largest p-adic valuation among its denominators cannot occur exactly
-    once.  This function returns true when a current unique maximum has no
-    possible future multiple in the broadest reachable denominator interval.
+
+def prime_power_dividing(value: int, prime: int) -> int:
+    """Return the largest power of ``prime`` dividing ``value``."""
+    power = 1
+    while value % prime == 0:
+        value //= prime
+        power *= prime
+    return power
+
+
+def extend_top_layers(layers: TopLayers, sequence: List[int]) -> TopLayers:
+    """Return maximal p-powers and full normalized p-adic residues."""
+    denominator = sequence[-1]
+    extended = layers.copy()
+    for prime, power in prime_power_factors(denominator):
+        previous = extended.get(prime)
+        if previous is None:
+            extended[prime] = (
+                power,
+                pow(denominator // power, -1, power),
+            )
+        elif power > previous[0]:
+            residue = 0
+            for selected in sequence:
+                if selected % prime != 0:
+                    continue
+                selected_power = prime_power_dividing(selected, prime)
+                residue += (power // selected_power) * pow(
+                    selected // selected_power, -1, power
+                )
+            extended[prime] = (power, residue % power)
+        else:
+            modulus = previous[0]
+            addend = (modulus // power) * pow(
+                denominator // power, -1, modulus
+            )
+            extended[prime] = (
+                modulus,
+                (previous[1] + addend) % modulus,
+            )
+    return extended
+
+
+@lru_cache(maxsize=None)
+def reachable_top_layer_residues(
+    prime: int, power: int, current: int, largest_reachable: int
+) -> Optional[FrozenSet[int]]:
+    """Over-approximate normalized p-adic residues from future p-multiples.
+
+    ``None`` means that the residue set exceeded the deliberately modest cap,
+    so callers must keep the branch.
     """
-    maxima: Dict[int, Tuple[int, int]] = {}
-    for denominator in sequence:
-        for prime, power in prime_power_factors(denominator):
-            previous = maxima.get(prime)
-            if previous is None or power > previous[0]:
-                maxima[prime] = (power, 1)
-            elif power == previous[0]:
-                maxima[prime] = (power, previous[1] + 1)
+    residues = {0}
+    first_multiple = ((current // prime) + 1) * prime
+    for denominator in range(first_multiple, largest_reachable + 1, prime):
+        denominator_power = prime_power_dividing(denominator, prime)
+        addend = (power // denominator_power) * pow(
+            denominator // denominator_power, -1, power
+        )
+        residues |= {(candidate + addend) % power for candidate in residues}
+        if len(residues) == power:
+            break
+        if len(residues) > 4096:
+            return None
+    return frozenset(residues)
 
-    current = sequence[-1]
+
+def has_impossible_top_layer(
+    layers: TopLayers, current: int, remaining: int
+) -> bool:
+    """Test whether some fixed maximal p-power cannot cancel modulo that power."""
     largest_reachable = current + 2 * remaining
-    for power, count in maxima.values():
-        if count != 1:
+    for prime, (power, residue) in layers.items():
+        # A higher p-adic layer could replace the current one.
+        next_higher = ((current // (power * prime)) + 1) * power * prime
+        if next_higher <= largest_reachable:
             continue
-        next_multiple = (current // power + 1) * power
-        if next_multiple > largest_reachable:
+
+        possible_residues = reachable_top_layer_residues(
+            prime, power, current, largest_reachable
+        )
+        if (
+            possible_residues is not None
+            and (-residue) % power not in possible_residues
+        ):
             return True
     return False
+
+
+def has_stranded_prime_power(sequence: List[int], remaining: int) -> bool:
+    """Detect a normalized p-adic residue that no future subset can cancel.
+
+    If reciprocals of the completed denominator sequence sum to an integer,
+    then, for every prime ``p`` with maximal selected p-power ``p**e``, the
+    normalized contributions from every positive p-adic layer must sum to zero
+    modulo ``p**e``. Future values are deliberately allowed to be an arbitrary
+    subset of the broadest reachable interval, ignoring the gap and
+    remaining-length constraints. Thus a failed modular subset-sum test is a
+    sound obstruction.
+
+    If a future value can be divisible by a still higher power of ``p``, the
+    current top layer may cease to be relevant and the test conservatively
+    declines to prune.  Very large residue sets are likewise skipped; that
+    affects speed only, never correctness.
+    """
+    layers: TopLayers = {}
+    prefix: List[int] = []
+    for denominator in sequence:
+        prefix.append(denominator)
+        layers = extend_top_layers(layers, prefix)
+    return has_impossible_top_layer(layers, sequence[-1], remaining)
 
 
 def search_length(length: int) -> Dict[str, object]:
@@ -86,11 +173,13 @@ def search_length(length: int) -> Dict[str, object]:
     pruned_above = 0
     pruned_prime_power = 0
 
-    def visit(sequence: List[int], total: Fraction) -> Optional[List[int]]:
+    def visit(
+        sequence: List[int], total: Fraction, layers: TopLayers
+    ) -> Optional[List[int]]:
         nonlocal nodes, pruned_above, pruned_below, pruned_prime_power
         nodes += 1
         remaining = length - len(sequence)
-        if has_stranded_prime_power(sequence, remaining):
+        if has_impossible_top_layer(layers, sequence[-1], remaining):
             pruned_prime_power += 1
             return None
         if remaining == 0:
@@ -111,14 +200,20 @@ def search_length(length: int) -> Dict[str, object]:
         for gap in (1, 2):
             denominator = current + gap
             sequence.append(denominator)
-            witness = visit(sequence, total + Fraction(1, denominator))
+            witness = visit(
+                sequence,
+                total + Fraction(1, denominator),
+                extend_top_layers(layers, sequence),
+            )
             sequence.pop()
             if witness is not None:
                 return witness
         return None
 
     for first in range(2, length):
-        witness = visit([first], Fraction(1, first))
+        witness = visit(
+            [first], Fraction(1, first), extend_top_layers({}, [first])
+        )
         if witness is not None:
             return {
                 "length": length,
