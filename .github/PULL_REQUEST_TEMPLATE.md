@@ -1,21 +1,63 @@
-## Change
+## Submission type
 
-Describe the change and its evidence. Link the related recommendation, correction, or dispute.
+- [ ] Mathematical solver information
+- [ ] Lean proof or formalization author information
 
-## Record or policy impact
+Select both when applicable. Remove sections that do not apply.
 
-Explain affected entries, status transitions, published decisions, and any conflict or recusal. If this is an announcement, link public attestations of completed verification and written recipient confirmation.
+**Only complete solutions to the original problem are accepted. Do not submit
+partial mathematical results or incomplete Lean formalizations.**
 
-## Checks
+## Problem and proposed change
 
-- [ ] All text is in English; candidate text does not announce an award.
-- [ ] Unconfirmed recipient identities use placeholders in every file and commit; no private contacts, payment details, assessment criteria or deliberations appear in files or commit history.
-- [ ] Verification artifacts are externally archived with ID, SHA-256, and byte count.
-- [ ] Published statements and decisions are preserved; replacements and revocations retain history.
-- [ ] `python scripts/manage.py validate` and `python scripts/manage.py links` pass.
-- [ ] `python scripts/manage.py build` has run and `python scripts/manage.py check` passes.
-- [ ] Relevant validator tests pass; any validation limits are explained.
+Problem ID(s): JSP-______
 
-## Reviewer decision
+State the current entry and proposed correction. Distinguish the mathematical
+solver, Lean formalization author and independent verifier. Explain each person's
+contribution; a repository owner or PR submitter is not automatically the solver.
 
-Record substantive review and any required committee confirmation here. A green CI result checks structure; it is not mathematical verification or permission to pay.
+## Solver evidence
+
+Required for solver attribution or publication updates; otherwise remove this section.
+
+- Solver(s) and contribution: REPLACE_WITH_NAMES_AND_CONTRIBUTIONS
+- Public proof or publication: REPLACE_WITH_HTTPS_LINK
+- Authorship evidence (paper author list, author/project announcement, or another public attribution source): REPLACE_WITH_HTTPS_LINK_AND_EXPLANATION
+- Relevant pages, theorem, version or date: REPLACE_WITH_DETAILS
+
+Link publicly accessible evidence supporting the claimed result and attribution.
+Explain any mismatch between paper authors, repository accounts and proposed
+credits. Do not include private identity documents or contact/payment information.
+
+## Proof source
+
+**Do not submit Lean source code here; provide the public repository URL, branch and full commit SHA instead.**
+
+Required for Lean proof or formalization attribution updates; otherwise remove this
+section. Use the full 40-character commit SHA of the proof version selected for
+review. Add an object for each additional proof repository.
+
+```json
+[
+  {
+    "repository": "https://github.com/OWNER/REPOSITORY",
+    "branch": "REPLACE_WITH_BRANCH",
+    "commit": "REPLACE_WITH_FULL_COMMIT_SHA"
+  }
+]
+```
+
+Identify the theorem/file proving the original problem and the formalization
+authors. Link to build instructions and attribution evidence in that repository.
+Explain how the pinned proof covers the full original statement and all required
+cases, without missing proof steps or additional unproved assumptions.
+
+## Submission checklist
+
+- [ ] I changed only solver attribution, Lean proof information or supporting sources in the relevant catalog.
+- [ ] I supplied the evidence required for the type of change above.
+- [ ] The mathematical result fully solves the original problem. Any submitted Lean proof is complete at the specified commit, with no `sorry`, `admit` or added unproved assumptions in the proof of that result.
+- [ ] This PR contains no proof source files, archives, binaries or vendored dependencies.
+- [ ] Any Lean reference identifies a commit contained in the named branch and the exact version for review.
+
+For unrelated corrections, use an issue.

@@ -12,7 +12,7 @@ Different sources serve different purposes:
 
 - **Problem collections and reference literature** help identify problems, trace their background, and connect related formulations.
 - **Original papers and monographs** provide statements, historical context, and mathematical results.
-- **Subsequent papers, preprints, public research announcements, and discussions** provide evidence of progress and reported solutions. Their publication and review status should be read as stated in each record.
+- **Solution papers, preprints, public research announcements, and discussions** provide evidence of complete solutions and their attribution. Their publication and review status should be read as stated in each record.
 - **Public formal proof repositories and accompanying documentation** provide evidence about formalization, the statement covered by a proof, and the contributors involved.
 
 References and links in individual entries preserve the connection to these sources. A source used to locate a problem does not necessarily establish its earliest formulation, a complete solution, or the attribution of every contribution.
@@ -27,7 +27,7 @@ JSP identifiers are catalog references. They do not establish original authorshi
 
 ## Coverage and award status
 
-The catalog covers areas including number theory, combinatorics, graph theory, analysis, geometry, and algebra. It includes open problems, partial progress, and solved problems. Keeping solved problems makes it possible to follow their research history and connect solutions with later formalization work.
+The catalog covers areas including number theory, combinatorics, graph theory, analysis, geometry, and algebra. **Current status** uses only **Open** or **Solved** as its status. Partial results and incomplete Lean formalizations are not recorded; problems without a complete solution remain **Open**. Solved entries retain complete-solution evidence and contributor credits, with mathematical solver credits included in the **Current status** field.
 
 The catalog includes all seven Millennium Prize Problems (JSP-000001 through JSP-000007): the Riemann hypothesis, P versus NP, the Birch–Swinnerton-Dyer conjecture, the Hodge conjecture, Navier–Stokes existence and smoothness, Yang–Mills existence and mass gap, and the Poincaré conjecture.
 
