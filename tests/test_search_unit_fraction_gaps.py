@@ -16,6 +16,10 @@ class UnitFractionGapSearchTests(unittest.TestCase):
     def test_tail_sum(self):
         self.assertEqual(search.tail_sum(2, 2, 2), Fraction(5, 12))
 
+    def test_stranded_prime_power_obstruction(self):
+        self.assertTrue(search.has_stranded_prime_power([5, 6, 7], 0))
+        self.assertFalse(search.has_stranded_prime_power([2, 3, 6], 0))
+
     def test_no_counterexample_through_ten_terms(self):
         result = search.scan(10)
         self.assertEqual(len(result["results"]), 9)
